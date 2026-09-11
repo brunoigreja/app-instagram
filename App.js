@@ -7,15 +7,23 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  Modal,
 } from 'react-native';
 
 import Lista from './src/components/lista';
 
 // Componente para renderizar cada Story individual
-const StoryItem = ({ item }) => (
-  <TouchableOpacity style={styles.storyContainer}>
+const StoryItem = ({ item, onPress }) => (
+  <TouchableOpacity style={styles.storyContainer} onPress={() => onPress(item)}>
     <View style={styles.storyBorder}>
-      <Image source={{ uri: item.imgperfil }} style={styles.storyImage} />
+      <Image 
+        source={
+          typeof item.imgperfil === 'string'
+            ? { uri: item.imgperfil }
+            : item.imgperfil
+        } 
+        style={styles.storyImage} 
+      />
       {item.isUser && (
         <View style={styles.addUserIcon}>
           <Text style={styles.addUserText}>+</Text>
@@ -33,33 +41,41 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
+      // Estado para armazenar o story ativo
+      selectedStory: null,
+
       // Lista de dados para os Stories
       stories: [
         {
           id: '1',
           nome: 'Your story',
-          imgperfil: 'https://sujeitoprogramador.com/instareact/fotoPerfil1.png',
+          imgperfil: require('./assets/img/Screenshot_3.png'),
+          imgStory: require('./assets/img/Screenshot_3.png'),
           isUser: true,
         },
         {
           id: '2',
           nome: 'super_santi_73',
-          imgperfil: 'https://sujeitoprogramador.com/instareact/fotoPerfil2.png',
+          imgperfil: require('./assets/img/image111.png'),
+          imgStory: require('./assets/img/image111.png'),
         },
         {
           id: '3',
           nome: 'lil_wyatt838',
-          imgperfil: 'https://sujeitoprogramador.com/instareact/fotoPerfil3.png',
+          imgperfil: require('./assets/img/1a44b34e-c3b0-4490-9718-11e7bf07ace6.png'),
+          imgStory: require('./assets/img/1a44b34e-c3b0-4490-9718-11e7bf07ace6.png'),
         },
         {
           id: '4',
           nome: 'liam_beanz5',
           imgperfil: 'https://sujeitoprogramador.com/instareact/fotoPerfil1.png',
+          imgStory: 'https://sujeitoprogramador.com/instareact/foto4.png',
         },
         {
           id: '5',
           nome: 'matheus_raiz',
           imgperfil: 'https://sujeitoprogramador.com/instareact/fotoPerfil2.png',
+          imgStory: 'https://sujeitoprogramador.com/instareact/foto5.png',
         }
       ],
       // Lista do Feed
@@ -113,6 +129,16 @@ class App extends Component {
      };
   }
 
+  // Abrir o modal com os dados do story
+  openStory = (story) => {
+    this.setState({ selectedStory: story });
+  };
+
+  // Fechar o modal
+  closeStory = () => {
+    this.setState({ selectedStory: null });
+  };
+
   render() {
     return (
       <SafeAreaProvider>
@@ -122,15 +148,15 @@ class App extends Component {
           <View style={styles.header}>
             <TouchableOpacity>
               <Image
-          source={require('./assets/img/logo.png')}
-          style={styles.logo}
+                source={require('./assets/img/logo.png')}
+                style={styles.logo}
               />
             </TouchableOpacity>
 
             <TouchableOpacity>
               <Image
-          source={require('./assets/img/like.png')}
-          style={styles.send}
+                source={require('./assets/img/like.png')}
+                style={styles.send}
               />
             </TouchableOpacity>
           </View>
@@ -148,12 +174,59 @@ class App extends Component {
                   showsHorizontalScrollIndicator={false}
                   keyExtractor={(item) => item.id}
                   data={this.state.stories}
-                  renderItem={({ item }) => <StoryItem item={item} />}
+                  renderItem={({ item }) => (
+                    <StoryItem item={item} onPress={this.openStory} />
+                  )}
                   contentContainerStyle={{ paddingHorizontal: 10 }}
                 />
               </View>
             }
           />
+
+          {/* Modal de Exibição do Story em Tela Cheia */}
+          <Modal
+  animationType="fade"
+  transparent={false}
+  visible={this.state.selectedStory !== null}
+  onRequestClose={this.closeStory}
+>
+  {this.state.selectedStory && (
+    <SafeAreaView style={styles.modalContainer}>
+      {/* Header superior do Story */}
+      <View style={styles.modalHeader}>
+        <View style={styles.modalUserInfo}>
+          <Image
+            source={
+              typeof this.state.selectedStory.imgperfil === 'string'
+                ? { uri: this.state.selectedStory.imgperfil }
+                : this.state.selectedStory.imgperfil
+            }
+            style={styles.modalUserImage}
+          />
+          <Text style={styles.modalUserName}>
+            {this.state.selectedStory.nome}
+          </Text>
+        </View>
+
+        {/* Botão de Fechar X */}
+        <TouchableOpacity onPress={this.closeStory} style={styles.closeButton}>
+          <Text style={styles.closeButtonText}>✕</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Imagem do Story */}
+      <Image
+        source={
+          typeof (this.state.selectedStory.imgStory || this.state.selectedStory.imgperfil) === 'string'
+            ? { uri: this.state.selectedStory.imgStory || this.state.selectedStory.imgperfil }
+            : (this.state.selectedStory.imgStory || this.state.selectedStory.imgperfil)
+        }
+        style={styles.storyFullImage}
+        resizeMode="cover"
+      />
+    </SafeAreaView>
+  )}
+</Modal>
 
         </SafeAreaView>
       </SafeAreaProvider>
@@ -185,7 +258,6 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
   },
-
   send: {
     width: 24,
     height: 24,
@@ -243,6 +315,52 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold',
     marginTop: -2,
+  },
+
+  // Estilos do Modal
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  modalHeader: {
+    position: 'absolute',
+    top: 45,
+    left: 15,
+    right: 15,
+    zIndex: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalUserInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modalUserImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#FFF',
+  },
+  modalUserName: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  closeButton: {
+    padding: 8,
+  },
+  closeButtonText: {
+    color: '#FFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  storyFullImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
 });
 
