@@ -1,5 +1,6 @@
 
 import React, { Component } from 'react';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   StyleSheet,
   Text,
@@ -69,7 +70,7 @@ class App extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
+      <SafeAreaProvider style={styles.container}>
       
       <View style={styles.header}>
         <TouchableOpacity>
@@ -94,7 +95,7 @@ class App extends Component {
       renderItem={ ({item}) => <Lista data={item} /> }
       />
 
-      </View>
+      </SafeAreaProvider>
     );
   }
 }

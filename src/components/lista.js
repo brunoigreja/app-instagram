@@ -122,17 +122,20 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+    marginTop: 10,
   },
   fotoPublicacao:{
     flex:1,
     height: 400,
-    alignItems: 'center'
+    alignItems: 'center',
+    marginTop: 10,
   },
   viewPerfil:{
     flexDirection: 'row',
     flex:1,
     alignItems: 'center',
     padding: 8,
+    resizeMode: 'cover'
   },
   areaBtn:{
     flexDirection: 'row',
